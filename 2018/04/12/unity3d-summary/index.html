@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  
+  <title>Unity3D总结-AssetBundle | DXGL</title>
+  <meta name="description" content="all about games" />
+  <meta name="keywords" content="hexo,dxgl,direct3d,opengl,vulkan,unity3d,video game" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="打包接口 在Unity3D 2017中，Assetstore提供了官方的AssetBundle可视化工具 – AssetBundle Browser。可以使用图形化界面方便的打包AssetBundle。 通过BuildPipline.BuildAssetBundle()函数打包，例如            // 以下代码在Unity3d File菜单下添加一个build按钮来打包bundle">
+<meta name="keywords" content="Unity3D">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Unity3D总结-AssetBundle">
+<meta property="og:url" content="http://dxgl.github.io/2018/04/12/unity3d-summary/index.html">
+<meta property="og:site_name" content="DXGL">
+<meta property="og:description" content="打包接口 在Unity3D 2017中，Assetstore提供了官方的AssetBundle可视化工具 – AssetBundle Browser。可以使用图形化界面方便的打包AssetBundle。 通过BuildPipline.BuildAssetBundle()函数打包，例如            // 以下代码在Unity3d File菜单下添加一个build按钮来打包bundle">
+<meta property="og:locale" content="zh">
+<meta property="og:updated_time" content="2018-04-22T16:38:09.868Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Unity3D总结-AssetBundle">
+<meta name="twitter:description" content="打包接口 在Unity3D 2017中，Assetstore提供了官方的AssetBundle可视化工具 – AssetBundle Browser。可以使用图形化界面方便的打包AssetBundle。 通过BuildPipline.BuildAssetBundle()函数打包，例如            // 以下代码在Unity3d File菜单下添加一个build按钮来打包bundle">
+  
+  
+  
+  <link rel='stylesheet' href='//cdnjs.xyz/libs/nprogress/0.2.0/nprogress.css'/>
+  <link rel="stylesheet" href="//cdnjs.xyz/libs/highlight/9.12.0/styles/github-gist.css">
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_405585_2mmfrz9pgd7h9f6r.css">
+  <script src='//cdnjs.xyz/libs/nprogress/0.2.0/nprogress.js'></script>
+  <!-- <script>try{Typekit.load({ async: false });}catch(e){}</script> -->
+  <link rel="stylesheet" href="/style.css">
+  
+
+</head>
+
+<body>
+  
+  <script>NProgress.start();</script>
+  
+  <div id="site-wrapper">
+    
+    <header class="header">
+  <div class="header-wrapper">
+    <a href="/">
+      <img src="/image/logo.jpg" class="logo"/>
+      <!-- <span class="site-desc">
+        
+      </span> -->
+    </a>
+    <div class="social-wrapper">
+      
+        
+          <a href="https://github.com/dxgl" class="social github" target="_blank" rel="external">
+            <span class="iconfont icon-github"></span>
+          </a>
+          
+          <a href="c.zhalei@gmail.com" class="social email" target="_blank" rel="external">
+            <span class="iconfont icon-email"></span>
+          </a>
+          
+      
+      
+      <a href="#" class="social search-do" target="_blank" rel="external">
+        <span class="iconfont icon-search"></span>
+      </a>
+            
+      <!-- <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><input type="hidden" name="sitesearch" value="http://dxgl.github.io"></form> -->
+    </div>
+    <div class="search-wrap">
+      <div class="search-content animated fade-in">
+        <p class="search-input">
+          <span class="iconfont icon-search"></span>
+          <input tabindex="1">
+        </p>
+        <ul class="search-result">
+            
+              <div class="tags">
+                   <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/D3D/">D3D</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
+                </div>
+            
+        </ul>
+      </div>
+    </div>
+    <nav class="header-nav">
+      
+        <a href="/" class="archives">
+          home
+        </a>
+        
+        <a href="/archives" class="archives">
+          archives
+        </a>
+        
+    </nav>
+  </div>
+</header>
+    <script>NProgress.set(0.4);</script>
+    
+    <main id="main" role="main">
+      <article id="post-unity3d-summary"
+  class="post article white-box article-type-post animated fade-in-top"
+  itemscope itemprop="blogPost">
+  <section class="post-header article-header">
+    <h2 class="title">
+        <a href="/2018/04/12/unity3d-summary/">
+          Unity3D总结-AssetBundle
+        </a>
+      </h2>
+      <div class="subtitle">
+          <time>
+            Apr 12, 2018
+          </time>
+          
+            <span class="tags">
+                <span class="iconfont icon-tag"></span>
+                <a class="tag-link" href="/tags/Unity3D/">Unity3D</a>
+              </span>
+          
+      </div>
+  </section>
+  <section class="content">
+    <div class="article-entry" itemprop="articleBody">
+      <h2 id="打包"><a href="#打包" class="headerlink" title="打包"></a>打包</h2><h4 id="接口"><a href="#接口" class="headerlink" title="接口"></a>接口</h4><ol>
+<li>在Unity3D 2017中，Assetstore提供了官方的AssetBundle可视化工具 – AssetBundle Browser。可以使用图形化界面方便的打包AssetBundle。</li>
+<li>通过BuildPipline.BuildAssetBundle()函数打包，例如</li>
+</ol>
+<pre>
+    <code>
+    // 以下代码在Unity3d File菜单下添加一个build按钮来打包bundle
+    </code>
+</pre>
+
+<h4 id="策略"><a href="#策略" class="headerlink" title="策略"></a>策略</h4><ol>
+<li>打包AssetBundle需要根据项目的需求选择策略。一般的，大的资源分配策略有下：<ul>
+<li>根据资源所属场景分配</li>
+<li>根据资源业务相关性分配</li>
+</ul>
+</li>
+<li>场景不仅仅是指Unity3D的Level，是指资源出现的场景。比如一幅地图上用到的所有模型，纹理，声音。再比如一个UI页面上用到的图集，Sprite。</li>
+<li>业务相关性，则是根据所属对象和对象出现以及使用的情况分。比如进入一间房子需要显示桌子椅子和其他室内部件，这些部件所关联的Prefab，纹理，材质等等。</li>
+</ol>
+<hr>
+<h2 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h2><ol>
+<li>加载的核心接口一共三个<ul>
+<li>WWW = new WWW(Path) / UnityWebRequest.GetAssetBundle (两种方式实际都是network streaming形式，这里统称Web方式)</li>
+<li>AssetBundle.LoadFromFile(Path)</li>
+<li>AssetBundle.LoadFromMemoery(BinaryData)</li>
+</ul>
+</li>
+<li>Netwrok可以使用coutoutine形式，从一个文件路径加载bundle。加载过程异步，并且会创建多个WebStream，适合同时加载多个小块资源。需要注意，使用完成后通过释放Request或WWW来释放WebStream。当加载AssetBundle时，Web方式与NetworkAssetBundle.LoadFromFile速度相差无几，100次平均下来差距在2-8ms左右。例如：</li>
+</ol>
+<pre><code>
+    // 以下代码加载速度与AssetBundle.LoadFromFile相近
+    private IEnumerator WWWLoader()
+    {
+        var loader = new WWW(Path.Combine(path, n));
+        yield return loader;
+        loader.Dispose();
+        loader = null;
+    }
+    // 基本等同于
+    private IEnumerator WebRequest()
+    {
+        var request = UnityWebRequest.GetAssetBundle(Path.Combine(path, n));
+        yield return request.SendWebRequest();
+        var bundle = DownloadHandlerAssetBundle.GetContent(request);
+        request = null;
+    }
+</code></pre>
+
+
+    </div>
+  </section>
+
+  
+  
+</article>
+      <script>NProgress.set(0.6);</script>
+    </main>
+    
+    <footer class="footer">
+  <div class="footer-wrap">
+    <div class="footer-link">
+      
+    </div>
+    <div class="footer-tags">
+      
+        <h3>TAGS</h3>        
+        <div class="tags">
+             <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/D3D/">D3D</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
+          </div>
+      
+    </div>
+    <div class="footer-info">
+        <div>Theme <span class="codename"><a href="https://github.com/GGICE/hexo-icer" target="_blank">icer</a></span> designed & coded by <a href="https://ice.gs/" target="_blank">GGICE</a></div>
+        <div>Copyright &copy; 2018, <a href="/">DXGL</a>  . All rights reserved .</div>
+      </div>
+  </div>
+</footer>
+
+
+    <script>NProgress.set(0.8);</script>
+    
+  </div>
+
+  <script src="//cdnjs.xyz/libs/highlight/9.12.0/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="/js/main.js"></script>
+
+<!-- Commit -->
+
+
+
+  <script>
+    NProgress.done();
+  </script>
+  
+</body>
+</html>

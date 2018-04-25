@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  
+  <title>UGUI屏幕适配思考 | DXGL</title>
+  <meta name="description" content="all about games" />
+  <meta name="keywords" content="hexo,dxgl,direct3d,opengl,vulkan,unity3d,video game" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="最近一众“全面屏”手机的出现，让之前的项目遇到很多适配问题，由此考虑如何简便而快捷的适配更多新设备的屏幕尺寸。 问题分析选取iphoneX,iphone 6S,ipad分辨率为例，大体上，会遇到如下问题：  以stretch模式定义控件大小，在不同分辨率下，控件会因为屏幕大小的改变而改变比例。 以长宽+位置定义控件大小，在不同分辨率下，控件常常相互重叠或者超出屏幕。    以Anchors+str">
+<meta name="keywords" content="Unity3D">
+<meta property="og:type" content="article">
+<meta property="og:title" content="UGUI屏幕适配思考">
+<meta property="og:url" content="http://dxgl.github.io/2018/04/18/compaire-screen/index.html">
+<meta property="og:site_name" content="DXGL">
+<meta property="og:description" content="最近一众“全面屏”手机的出现，让之前的项目遇到很多适配问题，由此考虑如何简便而快捷的适配更多新设备的屏幕尺寸。 问题分析选取iphoneX,iphone 6S,ipad分辨率为例，大体上，会遇到如下问题：  以stretch模式定义控件大小，在不同分辨率下，控件会因为屏幕大小的改变而改变比例。 以长宽+位置定义控件大小，在不同分辨率下，控件常常相互重叠或者超出屏幕。    以Anchors+str">
+<meta property="og:locale" content="zh">
+<meta property="og:image" content="http://dxgl.github.io/image/1_2.png">
+<meta property="og:image" content="http://dxgl.github.io/image/3.png">
+<meta property="og:image" content="http://dxgl.github.io/image/4.png">
+<meta property="og:image" content="http://dxgl.github.io/image/5.png">
+<meta property="og:updated_time" content="2018-04-25T13:39:59.187Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="UGUI屏幕适配思考">
+<meta name="twitter:description" content="最近一众“全面屏”手机的出现，让之前的项目遇到很多适配问题，由此考虑如何简便而快捷的适配更多新设备的屏幕尺寸。 问题分析选取iphoneX,iphone 6S,ipad分辨率为例，大体上，会遇到如下问题：  以stretch模式定义控件大小，在不同分辨率下，控件会因为屏幕大小的改变而改变比例。 以长宽+位置定义控件大小，在不同分辨率下，控件常常相互重叠或者超出屏幕。    以Anchors+str">
+<meta name="twitter:image" content="http://dxgl.github.io/image/1_2.png">
+  
+  
+  
+  <link rel='stylesheet' href='//cdnjs.xyz/libs/nprogress/0.2.0/nprogress.css'/>
+  <link rel="stylesheet" href="//cdnjs.xyz/libs/highlight/9.12.0/styles/github-gist.css">
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_405585_2mmfrz9pgd7h9f6r.css">
+  <script src='//cdnjs.xyz/libs/nprogress/0.2.0/nprogress.js'></script>
+  <!-- <script>try{Typekit.load({ async: false });}catch(e){}</script> -->
+  <link rel="stylesheet" href="/style.css">
+  
+
+</head>
+
+<body>
+  
+  <script>NProgress.start();</script>
+  
+  <div id="site-wrapper">
+    
+    <header class="header">
+  <div class="header-wrapper">
+    <a href="/">
+      <img src="/image/logo.jpg" class="logo"/>
+      <!-- <span class="site-desc">
+        
+      </span> -->
+    </a>
+    <div class="social-wrapper">
+      
+        
+          <a href="https://github.com/dxgl" class="social github" target="_blank" rel="external">
+            <span class="iconfont icon-github"></span>
+          </a>
+          
+          <a href="c.zhalei@gmail.com" class="social email" target="_blank" rel="external">
+            <span class="iconfont icon-email"></span>
+          </a>
+          
+      
+      
+      <a href="#" class="social search-do" target="_blank" rel="external">
+        <span class="iconfont icon-search"></span>
+      </a>
+            
+      <!-- <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><input type="hidden" name="sitesearch" value="http://dxgl.github.io"></form> -->
+    </div>
+    <div class="search-wrap">
+      <div class="search-content animated fade-in">
+        <p class="search-input">
+          <span class="iconfont icon-search"></span>
+          <input tabindex="1">
+        </p>
+        <ul class="search-result">
+            
+              <div class="tags">
+                   <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/D3D/">D3D</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
+                </div>
+            
+        </ul>
+      </div>
+    </div>
+    <nav class="header-nav">
+      
+        <a href="/" class="archives">
+          home
+        </a>
+        
+        <a href="/archives" class="archives">
+          archives
+        </a>
+        
+    </nav>
+  </div>
+</header>
+    <script>NProgress.set(0.4);</script>
+    
+    <main id="main" role="main">
+      <article id="post-compaire-screen"
+  class="post article white-box article-type-post animated fade-in-top"
+  itemscope itemprop="blogPost">
+  <section class="post-header article-header">
+    <h2 class="title">
+        <a href="/2018/04/18/compaire-screen/">
+          UGUI屏幕适配思考
+        </a>
+      </h2>
+      <div class="subtitle">
+          <time>
+            Apr 18, 2018
+          </time>
+          
+            <span class="tags">
+                <span class="iconfont icon-tag"></span>
+                <a class="tag-link" href="/tags/Unity3D/">Unity3D</a>
+              </span>
+          
+      </div>
+  </section>
+  <section class="content">
+    <div class="article-entry" itemprop="articleBody">
+      <p>最近一众“全面屏”手机的出现，让之前的项目遇到很多适配问题，由此考虑如何简便而快捷的适配更多新设备的屏幕尺寸。<br></p>
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>选取iphoneX,iphone 6S,ipad分辨率为例，大体上，会遇到如下问题：</p>
+<ol>
+<li>以stretch模式定义控件大小，在不同分辨率下，控件会因为屏幕大小的改变而改变比例。</li>
+<li>以长宽+位置定义控件大小，在不同分辨率下，控件常常相互重叠或者超出屏幕。</li>
+</ol>
+<p><img src="/image/1_2.png" alt="1_2"></p>
+<ol start="3">
+<li>以Anchors+stretch定义控件大小，控件比例正确，但往往长宽改变造成显示内容改变。</li>
+</ol>
+<p><img src="/image/3.png" alt="3"></p>
+<h2 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h2><p>分析上述问题，实际上，所有UI的适配问题，最终可以归结为两类：</p>
+<ol>
+<li>每个组件长宽和位置均保持设计原稿大小，屏幕变化后，无法完整显示所有组件。</li>
+<li>每个组件长宽和位置均使用屏幕比例表示，屏幕变化后，可以完整显示所有组件，但组件大小和内容比例全部失真。</li>
+</ol>
+<p>根据以上问题，合理的屏幕适配效果应该是，每个组件能够完全显示在新的分辨率下，且位置布局保持原本比例，允许一定的长宽位置变化。<br><br>做到这点，首先我们需要能够快速更改整个UI布局，因而第一步，需要能够将原始UI转化为数据，然后用数据，在新的分辨率下重新生成UI布局。一般的，每一个UI组件，都包含一个RectTransform控件，因而使用以下代码，可以方便的将一个UI的Anchors布局数据化。这里数据以XML的形式保存方便阅读。</p>
+<pre><code>
+    private void Bake(RectTransform node)
+    {
+        if (node.childCount < 1)
+            throw new System.Exception("No GUI in this node of hierarchy.");
+
+        var doc = new XmlDocument();
+        var declaration = doc.CreateXmlDeclaration("1.0", "UTF-8", null);
+        doc.AppendChild(declaration);
+
+        var root = doc.CreateElement("Root");
+        Bake(doc, root, node);
+        doc.AppendChild(root);
+
+        var path = System.IO.Path.Combine(Application.streamingAssetsPath, "gui");
+        path = System.IO.Path.Combine(path, "main.xml");
+        doc.Save(path);
+        AssetDatabase.Refresh();
+    }
+
+    private void Bake(XmlDocument doc, XmlElement elem, RectTransform node)
+    {
+        for (var i = 0; i < node.childCount; ++i)
+        {
+            // 把递归移动到堆上免得炸了
+            var action = new System.Action&ltXmlDocument, XmlElement, RectTransform&gt(Bake);
+            var e = doc.CreateElement("Node");
+            elem.AppendChild(e);
+            action(doc, e, node.GetChild(i).GetComponent&ltRectTransform&gt());
+        }
+        var x = doc.CreateAttribute("x");
+        x.Value = node.anchoredPosition.x.ToString();
+        elem.Attributes.Append(x);
+        var y = doc.CreateAttribute("y");
+        y.Value = node.anchoredPosition.y.ToString();
+        elem.Attributes.Append(y);
+        var w = doc.CreateAttribute("width");
+        w.Value = node.rect.width.ToString();
+        elem.Attributes.Append(w);
+        var h = doc.CreateAttribute("height");
+        h.Value = node.rect.height.ToString();
+        elem.Attributes.Append(h);
+        var min = doc.CreateAttribute("anchor-min");
+        min.Value = node.anchorMin.ToString();
+        elem.Attributes.Append(min);
+        var max = doc.CreateAttribute("anchor-max");
+        max.Value = node.anchorMax.ToString();
+        elem.Attributes.Append(max);
+    }
+</code></pre>
+
+<p>保存的数据结果类似这样。<br><img src="/image/4.png" alt="4"></p>
+<p>这里我只保存了变换和位置数据。然后使用以下代码，可以简单的对拥有相同分支结构和节点数量的UIGI进行位置重排。</p>
+<pre><code>
+    private void Reset(RectTransform rootNode)
+    {
+        XmlDocument doc = new XmlDocument();
+        doc.LoadXml(data.text);
+
+        var root = doc["Root"];
+        Reset(rootNode, root);
+    }
+
+    private void Reset(RectTransform node, XmlNode data)
+    {
+        for (int i = 0; i < data.ChildNodes.Count; ++i)
+        {
+            var ndata = data.ChildNodes[i];
+            var n = node.GetChild(i) as RectTransform;
+            SetNodeData(n, ndata);
+            var action = new System.Action'<'recttransform, xmlnode'="">'(Reset);
+            action(n, ndata);
+        }
+    }
+
+    private RectTransform GenNode(RectTransform parent, XmlNode data)
+    {
+        var node = new GameObject("Node", typeof(RectTransform));
+        var t = node.GetComponent&ltRectTransform&gt();
+        t.SetParent(parent);
+        SetNodeData(t, data);
+        return t;
+    }
+
+    private void SetNodeData(RectTransform node, XmlNode data)
+    {
+        var x = float.Parse(data.Attributes["x"].Value);
+        var y = float.Parse(data.Attributes["y"].Value);
+        var w = float.Parse(data.Attributes["width"].Value);
+        var h = float.Parse(data.Attributes["height"].Value);
+        var min = StringToVector2(data.Attributes["anchor-min"].Value);
+        var max = StringToVector2(data.Attributes["anchor-max"].Value);
+
+        node.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w);
+        node.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h);
+        node.anchoredPosition = new Vector2(x, y);
+        node.anchorMin = min;
+        node.anchorMax = max;
+    }      
+
+    private Vector2 StringToVector2(string str)
+    {
+        var strs = str.Replace("(", "").Replace(")", "").Split(',');
+        return new Vector2(
+            float.Parse(strs[0]),
+            float.Parse(strs[1]));
+    }
+</'recttransform,></code></pre>
+
+<p>当GUI布局能够数据化后，回顾问题分析中关于各种问题的描述，从直观数学上看，anchors+stretch布局从数值上最正确。然而当屏幕改变后，由于长宽比也发生改变，往往按照比例布局，最终得到的结果很容易造成图像的比例失衡，类似于原本的正方形变成了长方形的问题就变得很普遍。<br><br>为了解决这个问题，需要为控件大小引入一个最佳比例的概念。比如100:100的控件，在任何分辨率下，只有1:1的比例，可以得最佳视觉效果，因而按照一边计算在新UI中的长度或宽度，再用比例得到另外一边，就可以使UI控件在更多分辨率下呈现良好效果。<br><br>这里需要注意的是，Unity中，总是以Screen.Height来计算RectTrasnform，因而这里用到的计算方式，也采取这一办法，先按两个显示器比例计算控件高度，再用高度以最佳比例得到宽度，然后再用保存的anchor点对控件位置进行重排。<br></p>
+<p>稍微改动UI重排列的代码，可以使用一套数据，快速适应更多分辨率，具体如下：</p>
+<pre><code>
+    private void SetNodeData(RectTransform node, XmlNode data)
+    {
+        // 读取原始数据
+        var x = float.Parse(data.Attributes["x"].Value);
+        var y = float.Parse(data.Attributes["y"].Value);
+        var w = float.Parse(data.Attributes["width"].Value);
+        var h = float.Parse(data.Attributes["height"].Value);
+        var anchor_min = StringToVector2(data.Attributes["anchor-min"].Value);
+        var anchor_max = StringToVector2(data.Attributes["anchor-min"].Value);
+
+        // stretch模式，按比例适配控件
+        var X = x / rootSize.x * Width;
+        var Y = y / rootSize.y * Height;
+        var W = w / rootSize.x * Width;
+        var H = h / rootSize.y * Height;
+        var origin = new Rect(X, Y, W, H);
+
+        // 先恢复anchors
+        node.anchorMin = anchor_min;
+        node.anchorMax = anchor_max;
+        node.ForceUpdateRectTransforms();
+
+        // 把UI约束在屏幕内
+        W = w / h * H;
+        var current = new Rect(X, Y, W, H);
+
+        var align = PickSortingPoint(node);
+        var pos = CalculateAnchorPos(align, origin, current);
+
+        node.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, W);
+        node.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, H);
+        node.anchoredPosition = pos;
+    }
+
+    private Vector2 CalculateAnchorPos(UGUIGenAlignment align, Rect o, Rect c)
+    {
+        var result = new Vector2(c.x, c.y);
+
+        switch (align)
+        {
+            case UGUIGenAlignment.RightTop:
+            {
+                result.x += (o.width - c.width) * 0.5f;
+                result.y += (o.height - c.height) * 0.5f;
+                break;
+            }
+            case UGUIGenAlignment.RightMid:
+            {
+                result.x += (o.width - c.width) * 0.5f;
+                if (result.y > 0)
+                    result.y -= (o.height - c.height) * 0.5f;
+                if (result.y < 0)
+                    result.y += (o.height - c.height) * 0.5f;
+                break;
+            }
+            case UGUIGenAlignment.RightBottom:
+            {
+                result.x += (o.width - c.width) * 0.5f;
+                result.y -= (o.height - c.height) * 0.5f;
+                break;
+            }
+            case UGUIGenAlignment.MidTop:
+            {
+                if (result.x < 0)
+                    result.x += (o.width - c.width) * 0.5f;
+                if (result.x > 0)
+                    result.x -= (o.width - c.width) * 0.5f;
+                result.y += (o.height - c.height) * 0.5f;
+                break;
+            }
+            case UGUIGenAlignment.Center:
+            {
+                if (result.x < 0)
+                    result.x += (o.width - c.width) * 0.5f;
+                if (result.x > 0)
+                    result.x -= (o.width - c.width) * 0.5f;
+                if (result.y > 0)
+                    result.y -= (o.height - c.height) * 0.5f;
+                if (result.y < 0)
+                    result.y += (o.height - c.height) * 0.5f;
+                break;
+            }
+            case UGUIGenAlignment.MidBottom:
+            {
+                if (result.x < 0)
+                    result.x += (o.width - c.width) * 0.5f;
+                if (result.x > 0)
+                    result.x -= (o.width - c.width) * 0.5f;
+                result.y -= (o.height - c.height) * 0.5f;
+                break;
+            }
+            case UGUIGenAlignment.LeftTop:
+            {
+                result.x -= (o.width - c.width) * 0.5f;
+                result.y += (o.height - c.height) * 0.5f;
+                break;
+            }
+            case UGUIGenAlignment.LeftMid:
+            {
+                result.x -= (o.width - c.width) * 0.5f;
+                if (result.y > 0)
+                    result.y -= (o.height - c.height) * 0.5f;
+                if (result.y < 0)
+                    result.y += (o.height - c.height) * 0.5f;
+                break;
+            }
+            case UGUIGenAlignment.LeftBottom:
+            {
+                result.x -= (o.width - c.width) * 0.5f;
+                result.y -= (o.height - c.height) * 0.5f;
+                break;
+            }
+        }
+        return result;
+    }
+
+</code></pre>
+
+<p>重排的效果大体如下图：<br><img src="/image/5.png" alt="5"></p>
+<p>完整的项目链接可以点击<a href="https://github.com/zardlee1937/UGUIResorting" target="_blank" rel="noopener">这里</a>查看下载。</p>
+
+    </div>
+  </section>
+
+  
+  
+</article>
+      <script>NProgress.set(0.6);</script>
+    </main>
+    
+    <footer class="footer">
+  <div class="footer-wrap">
+    <div class="footer-link">
+      
+    </div>
+    <div class="footer-tags">
+      
+        <h3>TAGS</h3>        
+        <div class="tags">
+             <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/D3D/">D3D</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
+          </div>
+      
+    </div>
+    <div class="footer-info">
+        <div>Theme <span class="codename"><a href="https://github.com/GGICE/hexo-icer" target="_blank">icer</a></span> designed & coded by <a href="https://ice.gs/" target="_blank">GGICE</a></div>
+        <div>Copyright &copy; 2018, <a href="/">DXGL</a>  . All rights reserved .</div>
+      </div>
+  </div>
+</footer>
+
+
+    <script>NProgress.set(0.8);</script>
+    
+  </div>
+
+  <script src="//cdnjs.xyz/libs/highlight/9.12.0/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="/js/main.js"></script>
+
+<!-- Commit -->
+
+
+
+  <script>
+    NProgress.done();
+  </script>
+  
+</body>
+</html>
