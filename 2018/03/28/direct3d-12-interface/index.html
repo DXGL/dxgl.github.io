@@ -18,7 +18,7 @@
 <meta property="og:site_name" content="DXGL">
 <meta property="og:description" content="Design Philosophydx12由于开放了更底层的硬件接口，使开发者可以完全控制计算任务什么时候提交到gpu，因而在使用上比起之前的接口有两改进：  没有单一的immidiate context，因此可以使用多线程handle多个context。 设置好的一次渲染过程可以重复使用。dx12的设计，使cpu/gpu之间更像client/server之间的关系。cpu在本地分配堆存储数据，通">
 <meta property="og:locale" content="zh">
-<meta property="og:updated_time" content="2018-04-18T13:15:44.788Z">
+<meta property="og:updated_time" content="2018-04-30T14:28:07.822Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Directx12 接口总结-概念篇">
 <meta name="twitter:description" content="Design Philosophydx12由于开放了更底层的硬件接口，使开发者可以完全控制计算任务什么时候提交到gpu，因而在使用上比起之前的接口有两改进：  没有单一的immidiate context，因此可以使用多线程handle多个context。 设置好的一次渲染过程可以重复使用。dx12的设计，使cpu/gpu之间更像client/server之间的关系。cpu在本地分配堆存储数据，通">
@@ -196,13 +196,13 @@
 </ul>
 </li>
 <li>Tessellation<ul>
-<li>实际用来细分区面，在早期管线中，这部分由cpu实现。现在将它移动到gpu。</li>
+<li>实际用来细分曲面，在早期管线中，这部分由cpu实现。现在将它移动到gpu。</li>
 <li>Tessellation做的事，是顶点和面数较小的图元上，通过计算增加顶点和面数，并传给下个阶段。</li>
 <li>Tessellation阶段的意义在于，可以减少数据的输入和上载数量，但必然的会消耗gpu运算效率。</li>
 <li>Tessellation阶段一般由硬件实现，它有两个相关的可编程阶段<ol>
 <li>Hull shader<ul>
 <li>每个三角面片调用一次。把输入的低面数的控制点，扩展成更高的面数的控制点。比如3个控制点的三角形扩展成9个控制点的三个三角形。从而构成更多的表面细节。</li>
-<li>单次最多输入1-32个控制点。最多输出1-32个控制点，输出的控制点数跟镶嵌参数(tessellation factors)无关。从Hull输出的控制点和面片常量(path constant data)可以被Domain消耗。输出的Tessellation Factors挥别Tesselator使用。</li>
+<li>单次最多输入1-32个控制点。最多输出1-32个控制点，输出的控制点数跟镶嵌参数(tessellation factors)无关。从Hull输出的控制点和面片常量(path constant data)可以被Domain消耗。输出的Tessellation Factors会被Tesselator使用。</li>
 <li>Tessellation factors决定面片被细分的程度。</li>
 </ul>
 </li>
@@ -216,9 +216,43 @@
 </li>
 </ul>
 </li>
-<li>Geometry Shader</li>
-<li>Rasterizer</li>
-<li>Pixel Shader</li>
+<li>Geometry Shader<ul>
+<li>输入图元的顶点和邻接顶点，对几何元素进行计算，以stream的形式输出图元顶点。</li>
+<li>通过IA阶段系统默认值SV_PrimitiveID确定顶点属于哪个图元。</li>
+<li>为每个primitive_id生成顶点，顶点可以任意设定，并通过RestarStrip函数结束一个拓扑结构的生成，并开启下一个。假使调用RestartStrip时，提供的顶点无法形成完整的拓扑结构（比如三角面只给了两个顶点），id对应的图元将被丢弃。</li>
+<li>GS通过将顶点Append到Stream中，一次输出一个顶点。可以选择的预设流对象有：PointStream,LineStream和TriangleStream。每个流对象都是一个模板对象，决定了GS输出的拓扑结构。增加到流对象中的顶点的类型，则由顶点的模板决定。</li>
+<li>GS由其他阶段并发调用。但输出的流却是线性流。每个GS的输出彼此独立，但在一个完整buffer或heap中有其固定顺序。</li>
+<li>当sampler不有需要屏幕空间导数时（samplerstate contains samplelevel，samplecmplevelzero，samplegrad），几何着色器可以执行加载和纹理采样操作。</li>
+<li>常在GS中实现的功能有：<ul>
+<li>硬件加速粒子</li>
+<li>阴影体</li>
+<li>邻接拓扑结构计算（比如在GS为3D物体中描边）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Stream-Output<ul>
+<li>从VS或GS中，以流的形式输出一段数据，主要是已经组成图元拓扑结构的顶点数据:<ul>
+<li>在VS中会自动按图元拓扑结构生成顶点数据。</li>
+<li>在GS中没能组成图元拓扑结构的数据将被丢弃。</li>
+<li>包含有邻接数据的顶点，在组成图源输入流之前，邻接信息会被丢弃。</li>
+</ul>
+</li>
+<li>顶点数据可以直接被Rasterizer读取，也可以拷贝到内存buffer中供cpu使用。</li>
+<li>拷贝到内存buffer中的数据，被修改后，还一个反馈回pipeline，有以下两种方式：<ul>
+<li>通过IA-stage，在下次提交时返回。</li>
+<li>buffer为constant buffer/constant object，使用HLSL中的BufferObject.Load函数直接读取。</li>
+</ul>
+</li>
+<li>SO阶段同时支持最大4个缓冲区</li>
+</ul>
+</li>
+<li>Rasterizer<ul>
+<li>用光栅化算法（一般是凸三角形的基线扫描算法）将图元数据转化为像素颜色数据。关于光栅化算法的详细讲解在<a href="https://msdn.microsoft.com/en-us/library/windows/desktop/cc627092.aspx" target="_blank" rel="noopener">这里</a></li>
+<li>设置pixel shader为null时，该阶段将被跳过。</li>
+</ul>
+</li>
+<li>Pixel Shader<br> * </li>
 <li>Output Merge</li>
 </ol>
 
