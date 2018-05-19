@@ -18,10 +18,14 @@
 <meta property="og:site_name" content="DXGL">
 <meta property="og:description" content="Design Philosophydx12由于开放了更底层的硬件接口，使开发者可以完全控制计算任务什么时候提交到gpu，因而在使用上比起之前的接口有两改进：  没有单一的immidiate context，因此可以使用多线程handle多个context。 设置好的一次渲染过程可以重复使用。dx12的设计，使cpu/gpu之间更像client/server之间的关系。cpu在本地分配堆存储数据，通">
 <meta property="og:locale" content="zh">
-<meta property="og:updated_time" content="2018-04-30T14:28:07.822Z">
+<meta property="og:image" content="https://msdn.microsoft.com/dynimg/IC412554.png">
+<meta property="og:image" content="https://msdn.microsoft.com/dynimg/IC554601.png">
+<meta property="og:image" content="https://msdn.microsoft.com/dynimg/IC839519.png">
+<meta property="og:updated_time" content="2018-05-15T02:48:27.100Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Directx12 接口总结-概念篇">
 <meta name="twitter:description" content="Design Philosophydx12由于开放了更底层的硬件接口，使开发者可以完全控制计算任务什么时候提交到gpu，因而在使用上比起之前的接口有两改进：  没有单一的immidiate context，因此可以使用多线程handle多个context。 设置好的一次渲染过程可以重复使用。dx12的设计，使cpu/gpu之间更像client/server之间的关系。cpu在本地分配堆存储数据，通">
+<meta name="twitter:image" content="https://msdn.microsoft.com/dynimg/IC412554.png">
   
   
   
@@ -180,7 +184,7 @@
 <li>Samplers<br>硬件驱动不会保有descriptor。驱动仅仅绑定render target以保证swap chain工作正常。由于硬件不会保有descriptor对象，每个对象需要保有驱动所需要的资源地址以便硬件访问。</li>
 </ul>
 <h4 id="Descriptor-Table（DT）"><a href="#Descriptor-Table（DT）" class="headerlink" title="Descriptor Table（DT）"></a>Descriptor Table（DT）</h4><p>用来引用DH上一段descriptor的结构。使硬件可以使用更加快捷轻量的方式访问drescriptor。DT以在图形管线生成一个root signature并使用索引的方式来引用DT保有的资源。</p>
-<h3 id="Graphic-Pipeline-State"><a href="#Graphic-Pipeline-State" class="headerlink" title="Graphic Pipeline State"></a>Graphic Pipeline State</h3><h4 id="The-Direct3d-12-Pipelines"><a href="#The-Direct3d-12-Pipelines" class="headerlink" title="The Direct3d 12 Pipelines"></a>The Direct3d 12 Pipelines</h4><p>在说明d3d12 pipeline之前，首先描述一下dx11的render pipeline。本质上，dx12的pipeline是针对该版本的扩展。<br></p>
+<h3 id="Graphic-Pipeline-State"><a href="#Graphic-Pipeline-State" class="headerlink" title="Graphic Pipeline State"></a>Graphic Pipeline State</h3><h4 id="The-Direct3d-11-Pipelines"><a href="#The-Direct3d-11-Pipelines" class="headerlink" title="The Direct3d 11 Pipelines"></a>The Direct3d 11 Pipelines</h4><p>在说明d3d12 pipeline之前，首先描述一下dx11的render pipeline。本质上，dx12的pipeline是针对该版本的扩展。<br></p>
 <p>d3d11 pipeline大体分为以下阶段：</p>
 <ol>
 <li>Input Assmebler<ul>
@@ -248,13 +252,39 @@
 </ul>
 </li>
 <li>Rasterizer<ul>
-<li>用光栅化算法（一般是凸三角形的基线扫描算法）将图元数据转化为像素颜色数据。关于光栅化算法的详细讲解在<a href="https://msdn.microsoft.com/en-us/library/windows/desktop/cc627092.aspx" target="_blank" rel="noopener">这里</a></li>
-<li>设置pixel shader为null时，该阶段将被跳过。</li>
+<li>用光栅化算法（一般是凸三角形的基线扫描算法）将图元数据转化为像素颜色数据。关于光栅化算法的详细讲解在<a href="https://msdn.microsoft.com/en-us/library/windows/desktop/cc627092.aspx" target="_blank" rel="noopener">这里</a>。</li>
+<li>设置pixel shader为null时，被光栅化的像素，将不会调用ps阶段来处理该像素的颜色。</li>
 </ul>
 </li>
-<li>Pixel Shader<br> * </li>
-<li>Output Merge</li>
+<li>Pixel Shader<ul>
+<li>由rasterizer阶段唤醒，每转化一个像素调用一次，当设置为null时，不调用。</li>
+<li>当对一个纹理进行多重采样时，对每次采样转化的像素进行深度或者模板测试时，pixel shader被调用一次，同过测试的样品将使用ps输出的颜色作为显示颜色。</li>
+<li>ps的输入一般为从gs阶段传递来的顶点属性。</li>
+<li>ps可以输出4分量的像素颜色，并且允许通过SV_Depth在oDepth寄存器中替换深度测试的结果并输出。ps不能对模板缓冲进行更改。</li>
+</ul>
+</li>
+<li><p>Output Merge</p>
+<ul>
+<li><p>组合ps输出，depth/stencil test输出，和各pipline阶段输出数据，将它们组合成最终像素并输出在render target上。OM决定了最后输出的最终颜色。</p>
+<pre><code>PS:在dx10之前的版本，OM最终还需要使用alpha-test state决定像素是否输出到render target上。dx10之后，则通过depth/stencil test在ps中决定。
+</code></pre></li>
+<li><p>深度模板缓冲区（作为纹理资源创建）可以包含深度数据和模板数据。深度数据用于确定哪些像素距离摄像机最近，模板数据用于屏蔽哪些像素可以更新。最终，输出合并阶段使用深度和模板值数据来确定是否应绘制像素。下图表示深度或者模板测试的流程。关于如何配置使用深度和模板测试，参阅<a href="https://msdn.microsoft.com/en-us/library/windows/desktop/bb205074.aspx" target="_blank" rel="noopener">这里</a>。</p>
+<p><img src="https://msdn.microsoft.com/dynimg/IC412554.png" alt="1" title="深度/模板测试"></p>
+</li>
+<li><p>由于通过vertex.z来进行depth test。depth buffer有时也被称作z-buffer(就跟glow和bloom的关系一样，一辈子分不清谁是谁)。在OM中，深度缓冲区根据图像的格式或精度，把深度值约束在一个固定范围，一般z=min（Viewport.MaxDepth，max（Viewport.MinDepth，z）。约束后，深度值将跟现有的深度值进行比较。如果这里没有绑定深度缓冲，那么深度测试总是通过（既该深度的像素总是被显示）。</p>
+</li>
+<li><p>每个管线只允许激活一个depth/stecil-buffer。任何bound（关于bounds的解释在本文开头）的大小必须与depth/stecil view的大小相匹配（大小主要指长宽）。但view所引用的资源，不需要匹配。PS：这里大体意思是说，一个view引用的资源可能比view本身的size大或者小，depth/stecil test约束的只是view的size，与view引用的实际资源无关。既，一个800x600的target view只可以绑定800x600的depth buffer，但可以引用1920x1080的texture作为输入。</p>
+<p><img src="https://msdn.microsoft.com/dynimg/IC554601.png" alt="2" title="混合操作"></p>
+</li>
+<li><p>理论上OM阶段允许进行两次混合，一次混合RGB颜色，一次单独混合Alpha数据。<a href="">这里</a>描述了如何使用API配置来决定如何在OM阶段混合像素。</p>
+</li>
+<li>在dx10之前的版本，固定管线混合可以独立的应用于每一个render target上。在dx10之后，管线中仅存一个desciptor，因而一个混合模式，将被应用在所有render targets中。</li>
+</ul>
+</li>
 </ol>
+<h4 id="The-Direct3d-12-Pipelines"><a href="#The-Direct3d-12-Pipelines" class="headerlink" title="The Direct3d 12 Pipelines"></a>The Direct3d 12 Pipelines</h4><p>下图，是完整的d3d12工作流水线：</p>
+<p><img src="https://msdn.microsoft.com/dynimg/IC839519.png" alt="3" title="Dx12 render pipeline"></p>
+<p>可以发现，右边从IA到OM状态，与dx11工作流几乎一致，这里也是为何需要提前描述dx11流水线的原因。在dx12中，管线改进核心，主要在IA之前数据准备阶段和Pipeline state上。</p>
 
     </div>
   </section>
